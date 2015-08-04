@@ -5,6 +5,8 @@
 # installs occi-cli
 #
 
+set -x
+
 # Some variables
 VOMSES=/etc/vomses
 VOMSDIR=/etc/grid-security/vomsdir
@@ -67,30 +69,34 @@ install_debian() {
 
     DIST=$1
     PSEUDONAME=$2
- 
+
     # ensure that we have curl
     apt-get -qq install -y curl
 
     # get repos configurations
-    curl -s http://repository.egi.eu/community/software/rocci.cli/4.3.x/releases/repofiles/$DIST-$PSEUDONAME-amd64.list \
-         -o /etc/apt/sources.list.d/rocci.list
-    echo "deb http://repository.egi.eu/sw/production/cas/1/current egi-igtf core" > \
-         /etc/apt/sources.list.d/egi-trustanchors.list
-   
+    echo "Adding EGI UMD and EUGridPMA repositories keys"
     curl -s https://dist.eugridpma.info/distribution/igtf/current/GPG-KEY-EUGridPMA-RPM-3 | \
          apt-key add -
 
     curl -s http://repository.egi.eu/sw/production/umd/UMD-DEB-PGP-KEY | \
          apt-key add -
 
+    echo "Configuring EGI UMD repositories"
+    curl -s http://repository.egi.eu/community/software/rocci.cli/4.3.x/releases/repofiles/$DIST-$PSEUDONAME-amd64.list \
+         -o /etc/apt/sources.list.d/rocci.list
+
+    echo "deb http://repository.egi.eu/sw/production/cas/1/current egi-igtf core" > \
+         /etc/apt/sources.list.d/egi-trustanchors.list
+
     curl -s http://repository.egi.eu/sw/production/umd/3/repofiles/debian-squeeze/UMD-3-base.list \
          -o /etc/apt/sources.list.d/UMD-3-base.list
 
     curl -s http://repository.egi.eu/sw/production/umd/3/repofiles/debian-squeeze/UMD-3-updates.list \
-         -o /etc/apt/sources.list.d/UMD-3-updates.list 
+         -o /etc/apt/sources.list.d/UMD-3-updates.list
 
     apt-get -qq update
-    apt-get -y -q install ca-policy-egi-core fetch-crl occi-cli voms-clients3
+    echo "Installing ca-policy-egi-core, fetch-crl, voms-clients3 and occi-cli"
+    apt-get -y -qq install ca-policy-egi-core fetch-crl occi-cli voms-clients3
 
     # this is required to make voms-clients3 work
     [ -e /var/lib/voms-clients3/lib/commons-io.jar ] || \
@@ -104,12 +110,15 @@ install_rh6() {
     echo ""
     # ensure that we have curl
     yum -q -y install curl
+
+    echo "Configuring UMD and OCCI-CLI repositories"
     # get repos for UMD (includes CAs) and rOCCI
     yum -q localinstall -y http://repository.egi.eu/sw/production/umd/3/sl6/x86_64/updates/umd-release-3.0.1-1.el6.noarch.rpm
     curl -s http://repository.egi.eu/community/software/rocci.cli/4.3.x/releases/repofiles/sl-6-x86_64.repo > \
          /etc/yum.repos.d/rocci.repo
 
     # install packages
+    echo "Installing ca-policy-egi-core, fetch-crl, voms-clients3 and occi-cli"
     yum -q -y install ca-policy-egi-core fetch-crl occi-cli voms-clients3
 }
 
@@ -120,7 +129,6 @@ setup_voms() {
     echo "*"
     echo ""
 
-    set -x
     $SUDO mkdir -p $VOMSES
     for VO_PORT in "fedcloud.egi.eu:15002" "training.egi.eu:15014" ; do
 	VO=`echo $VO_PORT | cut -f1 -d":"`
@@ -142,11 +150,10 @@ EOF
     done
 
     # fetch crls
-    $SUDO $FETCH_CRL 
+    $SUDO $FETCH_CRL
 }
 
 
- 
 if [ -z "$OSTYPE" ] ; then
     echo "Unable to determine OS, will not install"
     exit 1
@@ -160,20 +167,20 @@ case "$OSTYPE" in
 	SUDO=sudo
 	FETCH_CRL=/usr/local/sbin/fetch-crl
 	install_darwin
-        ;; 
+        ;;
     linux*)
     	get_root
         if [ -f /etc/redhat-release ] ; then
             # RH based
             REV=`cat /etc/redhat-release | sed s/.*release\ // | sed s/\ .*// | cut -f1 -d"."`
             if [ "x$REV" == "x6" ] ; then
-                install_rh6     
+                install_rh6
             else
                 echo "Unsupported RedHat release $REV"
                 exit 1
             fi
         elif [ -f /etc/debian_version ] ; then
-            DIST=`cat /etc/lsb-release | grep '^DISTRIB_ID' | awk -F=  '{ print $2 }' | tr '[:upper:]' '[:lower:]'` 
+            DIST=`cat /etc/lsb-release | grep '^DISTRIB_ID' | awk -F=  '{ print $2 }' | tr '[:upper:]' '[:lower:]'`
             PSEUDONAME=`cat /etc/lsb-release | grep '^DISTRIB_CODENAME' | awk -F=  '{ print $2 }'`
             REV=`cat /etc/lsb-release | grep '^DISTRIB_RELEASE' | awk -F=  '{ print $2 }'`
             if [ "x$DIST" == "xdebian" ] ; then
