@@ -43,26 +43,24 @@ install_darwin() {
     fi
 
     echo "*"
-    echo "* Package installation"
+    echo "* Installation"
     echo "*"
     echo ""
+
+    echo "Installing fetch-crl and voms"
     # install fetch-crl and voms (v2, should work for most cases)
     brew install fetch-crl voms
 
+    # OCCI client
+    echo "Installing OCCI client"
+    gem install occi-cli
+
     # CA Certificates
+    echo "Downloading CA certificates"
     sudo mkdir -p /etc/grid-security/certificates
     CA_BUNDLE=https://dist.eugridpma.info/distribution/igtf/current/accredited/igtf-preinstalled-bundle-classic.tar.gz
     curl -s $CA_BUNDLE | sudo tar -xz -C /etc/grid-security/certificates
 
-    # OCCI client
-    echo "# Missing OCCI client installation!"
-    #ruby -v
-
-#cat > /dev/null << EOF
-#    if which ruby >/dev/null && which gem >/dev/null; then
-#        PATH="$(ruby -rubygems -e 'puts Gem.user_dir')/bin:$PATH"
-#    fi
-#EOF
 }
 
 install_debian() {
