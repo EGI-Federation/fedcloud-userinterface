@@ -4,8 +4,14 @@
 # installs and configures VOMS for fedcloud.egi.eu and training.egi.eu VOs
 # installs occi-cli
 #
-
-set -x
+# usage:
+# on Linux systems execute with root privileges, e.g.:
+#       sudo ./fedcloud-ui.sh
+#
+# on OS X, it will use sudo internally (brew does not like to be
+#   executed as root):
+#       ./fedcloud-ui.sh
+#
 
 # Some variables
 VOMSES=/etc/vomses
@@ -20,8 +26,6 @@ VOMS1_CA="/C=NL/O=TERENA/CN=TERENA eScience SSL CA"
 VOMS2_SERVER=voms2.grid.cesnet.cz
 VOMS2_DN="/DC=org/DC=terena/DC=tcs/OU=Domain Control Validated/CN=voms2.grid.cesnet.cz"
 VOMS2_CA="/C=NL/ST=Noord-Holland/L=Amsterdam/O=TERENA/CN=TERENA eScience SSL CA 2"
-
-
 
 get_root() {
     if [ $(id -u) -ne 0 ] ; then
