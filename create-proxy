@@ -1,0 +1,15 @@
+#!/bin/bash
+: ${VO:=fedcloud.egi.eu}
+
+if [ "x$1" != "x" ]; then
+    VO=$1
+fi
+
+docker rm occi-voms-proxy 2> /dev/null
+# be sure to have updated crls
+docker run -it egifedcloud/fedcloud-userinterface \
+	   /bin/bash -c (fetch-crl -v  || true)
+# create proxy
+docker run -it -v ~/.globus:/root/.globus:ro --name occi-voms-proxy \
+	   egifedcloud/fedcloud-userinterface \
+	   voms-proxy-init $VO --rfc 
