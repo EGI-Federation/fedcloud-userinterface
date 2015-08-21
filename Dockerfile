@@ -8,6 +8,8 @@ RUN /tmp/fedcloud-ui.sh
 
 RUN fetch-crl -v || true
 
+WORKDIR /data
+
 # /etc/grid-security/certificates keeps the CRLs
 # /tmp keeps the proxy files
 VOLUME [ "/etc/grid-security/certificates", "/tmp" ]
