@@ -2,6 +2,6 @@
 FROM ubuntu:trusty
 MAINTAINER Enol Fernandez <enol.fernandez@egi.eu>
 
-ENV DEBIAN_FRONTEND noninteractive
+ADD fedcloud-ui.sh /tmp/fedcloud-ui.sh
 
-
+RUN /tmp/fedcloud-ui.sh
