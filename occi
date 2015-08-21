@@ -1,0 +1,8 @@
+#!/bin/bash
+: ${OCCI_ENDPOINT:="https://carach5.ics.muni.cz:11443"}
+
+docker run --rm --volumes-from occi-voms-proxy -it \
+	   -v $PWD:/data:rw \
+           egifedcloud/fedcloud-userinterface \
+	   occi -n x509 -x /tmp/x509up_u0 -X -e ${OCCI_ENDPOINT} \
+                $@
