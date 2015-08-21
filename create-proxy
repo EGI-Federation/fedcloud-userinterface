@@ -12,4 +12,4 @@ docker run -it egifedcloud/fedcloud-userinterface \
 # create proxy
 docker run -it -v ~/.globus:/root/.globus:ro --name occi-voms-proxy \
 	   egifedcloud/fedcloud-userinterface \
-	   voms-proxy-init $VO --rfc 
+	   voms-proxy-init --voms $VO --rfc
