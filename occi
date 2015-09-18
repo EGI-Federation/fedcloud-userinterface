@@ -2,21 +2,21 @@
 : ${OCCI_ENDPOINT:="https://carach5.ics.muni.cz:11443"}
 : ${VO:=fedcloud.egi.eu}
 
-docker run --volumes-from occi-voms-proxy -it \
-	egifedcloud/fedcloud-userinterface \
-	voms-proxy-info -exists 2> /dev/null
+docker inspect occi-voms-proxy &> /dev/null && \
+       docker run --volumes-from occi-voms-proxy -it \
+                  egifedcloud/fedcloud-userinterface \
+                  voms-proxy-info -exists
 
 if [ $? -ne 0 ]; then
     echo "Could not find a valid proxy, creating a new one for VO $VO"
     docker rm occi-voms-proxy &> /dev/null
     # create proxy after updating crls
     docker run -it -v ~/.globus:/root/.globus:ro --name occi-voms-proxy \
-	   egifedcloud/fedcloud-userinterface \
-	   /bin/bash -c "(fetch-crl -v -T 30 || true) && voms-proxy-init --voms $VO --rfc"
+         egifedcloud/fedcloud-userinterface \
+         /bin/bash -c "(fetch-crl -v -T 30 || true) && voms-proxy-init --voms $VO --rfc"
 fi
 
-docker run --rm --volumes-from occi-voms-proxy -it \
-	   -v $PWD:/data:rw \
+docker run --rm --volumes-from occi-voms-proxy -it -v $PWD:/data:rw \
            egifedcloud/fedcloud-userinterface \
-	   occi -n x509 -x /tmp/x509up_u0 -X -e ${OCCI_ENDPOINT} \
+           occi -n x509 -x /tmp/x509up_u0 -X -e ${OCCI_ENDPOINT} \
                 $@
