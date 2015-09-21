@@ -2,7 +2,7 @@
   "builders": [{
     "type": "virtualbox-iso",
     "guest_os_type": "Ubuntu_64",
-    "disk_size": 2000,
+    "disk_size": 8000,
     "iso_url": "http://archive.ubuntu.com/ubuntu/dists/trusty/main/installer-amd64/current/images/netboot/mini.iso",
     "iso_checksum": "bc09966b54f91f62c3c41fc14b76f2baa4cce48595ce22e8c9f24ab21ac8d965",
     "iso_checksum_type": "sha256",
@@ -18,7 +18,7 @@
         " install auto=true priority=critical preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ubuntu.cfg",
         "<enter>"
     ],
-    "vm_name": "FedCloud-Client-Ubuntu.14.04.20150623"
+    "vm_name": "FedCloud-Client-Ubuntu.14.04.20150902"
   }],
   "provisioners": [
     {
@@ -32,18 +32,20 @@
         "destination": "/root/sshd_config"
     },
     {
-        "type": "file",
-        "source": "provisioners/vomses",
-        "destination": "/root/vomses"
-    },
-    {
-        "type": "file",
-        "source": "provisioners/vomsdir",
-        "destination": "/root/vomsdir"
+        "type": "shell",
+        "script": "provisioners/basic.sh"
     },
     {
         "type": "shell",
-        "script": "provisioners/script.sh"
+        "script": "../fedcloud-ui.sh"
+    },
+    {
+        "type": "shell",
+        "script": "provisioners/fetch-crl.sh"
+    },
+    {
+        "type": "shell",
+        "script": "provisioners/clean.sh"
     }
   ]
 }
