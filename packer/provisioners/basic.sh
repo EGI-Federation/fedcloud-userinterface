@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# remove i386 architecture
+dpkg --remove-architecture i386
+
 # update already installed packages
 apt-get update
 
