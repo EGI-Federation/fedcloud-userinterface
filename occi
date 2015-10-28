@@ -2,6 +2,14 @@
 : ${OCCI_ENDPOINT:="https://carach5.ics.muni.cz:11443"}
 : ${VO:=fedcloud.egi.eu}
 
+
+VO_VOLS=""
+MYDIR=$( cd -P -- "$(dirname -- "$0")" && pwd -P)
+if [ -d $MYDIR/vomses -a -d $MYDIR/vomsdir ] ; then
+    VO_VOLS="-v $MYDIR/vomses:/etc/vomses:ro \
+             -v $MYDIR/vomsdir:/etc/grid-security/vomsdir:ro"
+fi
+
 docker inspect occi-voms-proxy &> /dev/null && \
        docker run --volumes-from occi-voms-proxy -it \
                   egifedcloud/fedcloud-userinterface \
@@ -11,12 +19,14 @@ if [ $? -ne 0 ]; then
     echo "Could not find a valid proxy, creating a new one for VO $VO"
     docker rm occi-voms-proxy &> /dev/null
     # create proxy after updating crls
-    docker run -it -v ~/.globus:/root/.globus:ro --name occi-voms-proxy \
-         egifedcloud/fedcloud-userinterface \
-         /bin/bash -c "(fetch-crl -v -T 30 || true) && voms-proxy-init --voms $VO --rfc"
+    docker run -it -v ~/.globus:/root/.globus:ro $VO_VOLS \
+               --name occi-voms-proxy \
+               egifedcloud/fedcloud-userinterface \
+               /bin/bash -c "(fetch-crl -v -T 30 -p 2 || true) && \
+                             voms-proxy-init --voms $VO --rfc"
 fi
 
 docker run --rm --volumes-from occi-voms-proxy -it -v $PWD:/data:rw \
            egifedcloud/fedcloud-userinterface \
            occi -n x509 -x /tmp/x509up_u0 -X -e ${OCCI_ENDPOINT} \
-                $@
+                "$@"
