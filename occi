@@ -2,7 +2,6 @@
 : ${OCCI_ENDPOINT:="https://carach5.ics.muni.cz:11443"}
 : ${VO:=fedcloud.egi.eu}
 
-
 VO_VOLS=""
 MYDIR=$( cd -P -- "$(dirname -- "$0")" && pwd -P)
 if [ -d $MYDIR/vomses -a -d $MYDIR/vomsdir ] ; then
@@ -22,7 +21,7 @@ if [ $? -ne 0 ]; then
     docker run -it -v ~/.globus:/root/.globus:ro $VO_VOLS \
                --name occi-voms-proxy \
                egifedcloud/fedcloud-userinterface \
-               /bin/bash -c "(fetch-crl -v -T 30 -p 2 || true) && \
+               /bin/bash -c "(fetch-crl -v -T 30 || true) && \
                              voms-proxy-init --voms $VO --rfc"
 fi
 
