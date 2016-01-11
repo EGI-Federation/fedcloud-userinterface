@@ -20,9 +20,9 @@ SUDO=""
 FETCH_CRL=fetch-crl
 
 # VOMS config
-VOMS1_SERVER=voms1.egee.cesnet.cz
-VOMS1_DN="/DC=org/DC=terena/DC=tcs/OU=Domain Control Validated/CN=voms1.egee.cesnet.cz"
-VOMS1_CA="/C=NL/O=TERENA/CN=TERENA eScience SSL CA"
+VOMS1_SERVER=voms1.grid.cesnet.cz
+VOMS1_DN="/DC=org/DC=terena/DC=tcs/C=CZ/ST=Hlavni mesto Praha/L=Praha 6/O=CESNET/CN=voms1.grid.cesnet.cz"
+VOMS1_CA="/C=NL/ST=Noord-Holland/L=Amsterdam/O=TERENA/CN=TERENA eScience SSL CA 3"
 VOMS2_SERVER=voms2.grid.cesnet.cz
 VOMS2_DN="/DC=org/DC=terena/DC=tcs/C=CZ/ST=Hlavni mesto Praha/L=Praha 6/O=CESNET/CN=voms2.grid.cesnet.cz"
 VOMS2_CA="/C=NL/ST=Noord-Holland/L=Amsterdam/O=TERENA/CN=TERENA eScience SSL CA 3"
@@ -135,12 +135,12 @@ setup_voms() {
     for VO_PORT in "fedcloud.egi.eu:15002" "training.egi.eu:15014" ; do
 	VO=`echo $VO_PORT | cut -f1 -d":"`
 	PORT=`echo $VO_PORT | cut -f2 -d":"`
-    	$SUDO mkdir -p $VOMSDIR/$VO
-    	$SUDO tee $VOMSDIR/$VO/$VOMS1_SERVER.lsc > /dev/null << EOF
+        $SUDO mkdir -p $VOMSDIR/$VO
+        $SUDO tee $VOMSDIR/$VO/$VOMS1_SERVER.lsc > /dev/null << EOF
 $VOMS1_DN
 $VOMS1_CA
 EOF
-    	$SUDO tee $VOMSDIR/$VO/$VOMS2_SERVER.lsc > /dev/null << EOF
+        $SUDO tee $VOMSDIR/$VO/$VOMS2_SERVER.lsc > /dev/null << EOF
 $VOMS2_DN
 $VOMS2_CA
 EOF
@@ -171,7 +171,7 @@ case "$OSTYPE" in
 	install_darwin
         ;;
     linux*)
-    	get_root
+        get_root
         if [ -f /etc/redhat-release ] ; then
             # RH based
             REV=`cat /etc/redhat-release | sed s/.*release\ // | sed s/\ .*// | cut -f1 -d"."`
