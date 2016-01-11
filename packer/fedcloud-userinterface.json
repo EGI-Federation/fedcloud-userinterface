@@ -18,7 +18,7 @@
         " install auto=true priority=critical preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ubuntu.cfg",
         "<enter>"
     ],
-    "vm_name": "FedCloud-Client-Ubuntu.14.04.20150902"
+    "vm_name": "FedCloud-Client-Ubuntu.14.04.20160111"
   }],
   "provisioners": [
     {
@@ -33,7 +33,7 @@
     },
     {
         "type": "shell",
-        "script": "provisioners/basic.sh"
+        "script": "provisioners/init.sh"
     },
     {
         "type": "shell",
