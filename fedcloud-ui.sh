@@ -20,9 +20,9 @@ SUDO=""
 FETCH_CRL=fetch-crl
 
 # VOMS config
-VOMS1_SERVER=voms1.egee.cesnet.cz
-VOMS1_DN="/DC=org/DC=terena/DC=tcs/OU=Domain Control Validated/CN=voms1.egee.cesnet.cz"
-VOMS1_CA="/C=NL/O=TERENA/CN=TERENA eScience SSL CA"
+VOMS1_SERVER=voms1.grid.cesnet.cz
+VOMS1_DN="/DC=org/DC=terena/DC=tcs/C=CZ/ST=Hlavni mesto Praha/L=Praha 6/O=CESNET/CN=voms1.grid.cesnet.cz"
+VOMS1_CA="/C=NL/ST=Noord-Holland/L=Amsterdam/O=TERENA/CN=TERENA eScience SSL CA 3"
 VOMS2_SERVER=voms2.grid.cesnet.cz
 VOMS2_DN="/DC=org/DC=terena/DC=tcs/C=CZ/ST=Hlavni mesto Praha/L=Praha 6/O=CESNET/CN=voms2.grid.cesnet.cz"
 VOMS2_CA="/C=NL/ST=Noord-Holland/L=Amsterdam/O=TERENA/CN=TERENA eScience SSL CA 3"
