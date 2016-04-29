@@ -92,10 +92,6 @@ install_debian() {
 
     if [ $PSEUDONAME = "xenial" ]; then
         VOMS_PACKAGE="voms-clients"
-
-        # this is a hack to avoid current issue with xenial repo, to be removed
-        curl -s http://repository.egi.eu/community/software/rocci.cli/4.3.x/releases/repofiles/$DIST-trusty-amd64.list \
-             -o /etc/apt/sources.list.d/rocci.list
     else
         VOMS_PACKAGE="voms-clients3"
 
