@@ -76,33 +76,46 @@ install_debian() {
     apt-get -qq install -y curl
 
     # get repos configurations
-    echo "Adding EGI UMD and EUGridPMA repositories keys"
+    echo "Configure EUGridPMA repository"
     curl -s https://dist.eugridpma.info/distribution/igtf/current/GPG-KEY-EUGridPMA-RPM-3 | \
          apt-key add -
-
-    curl -s http://repository.egi.eu/sw/production/umd/UMD-DEB-PGP-KEY | \
-         apt-key add -
-
-    echo "Configuring EGI UMD repositories"
-    curl -s http://repository.egi.eu/community/software/rocci.cli/4.3.x/releases/repofiles/$DIST-$PSEUDONAME-amd64.list \
-         -o /etc/apt/sources.list.d/rocci.list
 
     echo "deb http://repository.egi.eu/sw/production/cas/1/current egi-igtf core" > \
          /etc/apt/sources.list.d/egi-trustanchors.list
 
-    curl -s http://repository.egi.eu/sw/production/umd/3/repofiles/debian-squeeze/UMD-3-base.list \
-         -o /etc/apt/sources.list.d/UMD-3-base.list
+    echo "Configure rOCCI repository"
+    curl -s http://repository.egi.eu/sw/production/umd/UMD-DEB-PGP-KEY | \
+         apt-key add -
 
-    curl -s http://repository.egi.eu/sw/production/umd/3/repofiles/debian-squeeze/UMD-3-updates.list \
-         -o /etc/apt/sources.list.d/UMD-3-updates.list
+    curl -s http://repository.egi.eu/community/software/rocci.cli/4.3.x/releases/repofiles/$DIST-$PSEUDONAME-amd64.list \
+         -o /etc/apt/sources.list.d/rocci.list
+
+    if [ $PSEUDONAME = "xenial" ]; then
+        VOMS_PACKAGE="voms-clients"
+
+        # this is a hack to avoid current issue with xenial repo, to be removed
+        curl -s http://repository.egi.eu/community/software/rocci.cli/4.3.x/releases/repofiles/$DIST-trusty-amd64.list \
+             -o /etc/apt/sources.list.d/rocci.list
+    else
+        VOMS_PACKAGE="voms-clients3"
+
+        echo "Configuring EGI UMD repositories"
+        curl -s http://repository.egi.eu/sw/production/umd/3/repofiles/debian-squeeze/UMD-3-base.list \
+             -o /etc/apt/sources.list.d/UMD-3-base.list
+
+        curl -s http://repository.egi.eu/sw/production/umd/3/repofiles/debian-squeeze/UMD-3-updates.list \
+             -o /etc/apt/sources.list.d/UMD-3-updates.list
+    fi
 
     apt-get -qq update
-    echo "Installing ca-policy-egi-core, fetch-crl, voms-clients3 and occi-cli"
-    apt-get -y -qq install ca-policy-egi-core fetch-crl occi-cli voms-clients3
+    echo "Installing ca-policy-egi-core, fetch-crl, occi-cli and voms"
+    apt-get -y -qq install ca-policy-egi-core fetch-crl occi-cli $VOMS_PACKAGE
 
-    # this is required to make voms-clients3 work
-    [ -e /var/lib/voms-clients3/lib/commons-io.jar ] || \
-        ln -s /usr/share/java/commons-io.jar /var/lib/voms-clients3/lib/
+    if [ $PSEUDONAME != "xenial" ]; then
+        # this is required to make voms-clients3 work
+        [ -e /var/lib/voms-clients3/lib/commons-io.jar ] || \
+            ln -s /usr/share/java/commons-io.jar /var/lib/voms-clients3/lib/
+    fi
 }
 
 install_rh6() {
@@ -164,11 +177,11 @@ fi
 OS=""
 case "$OSTYPE" in
     darwin*)
-	# OS X voms uses by default this location:
-	VOMSES=/usr/local/etc/vomses
-	SUDO=sudo
-	FETCH_CRL=/usr/local/sbin/fetch-crl
-	install_darwin
+        # OS X voms uses by default this location:
+        VOMSES=/usr/local/etc/vomses
+        SUDO=sudo
+        FETCH_CRL=/usr/local/sbin/fetch-crl
+        install_darwin
         ;;
     linux*)
         get_root
@@ -191,7 +204,8 @@ case "$OSTYPE" in
                     exit 1
                 fi
             elif [ "x$DIST" == "xubuntu" ] ; then
-                if [ "x$PSEUDONAME" != "xtrusty" -a "x$PSEUDONAME" != "xprecise" ] ; then
+                echo "$PSEUDONAME" | grep -E "^(trusty|precise|xenial)$" > /dev/null
+                if [ $? -ne 0 ] ; then
                     echo "Unsupported ubuntu release $PSEUDONAME"
                     exit 1
                 fi
