@@ -84,11 +84,11 @@ install_debian() {
          /etc/apt/sources.list.d/egi-trustanchors.list
 
     echo "Configure rOCCI repository"
-    curl -s http://repository.egi.eu/sw/production/umd/UMD-DEB-PGP-KEY | \
+    curl -s http://repository.egi.eu/community/keys/APPDBCOMM-DEB-PGP-KEY.asc | \
          apt-key add -
 
-    curl -s http://repository.egi.eu/community/software/rocci.cli/4.3.x/releases/repofiles/$DIST-$PSEUDONAME-amd64.list \
-         -o /etc/apt/sources.list.d/rocci.list
+    curl -s http://repository.egi.eu/community/software/rocci.cli/4.3.x/releases/repofiles/$DIST-$PSEUDONAME-amd64.list | \
+         sed "s/^deb http/deb [arch=amd64] http/" | tee /etc/apt/sources.list.d/rocci.list > /dev/null
 
     if [ $PSEUDONAME = "xenial" ]; then
         VOMS_PACKAGE="voms-clients"
@@ -96,6 +96,10 @@ install_debian() {
         VOMS_PACKAGE="voms-clients3"
 
         echo "Configuring EGI UMD repositories"
+
+        curl -s http://repository.egi.eu/sw/production/umd/UMD-DEB-PGP-KEY | \
+             apt-key add -
+
         curl -s http://repository.egi.eu/sw/production/umd/3/repofiles/debian-squeeze/UMD-3-base.list \
              -o /etc/apt/sources.list.d/UMD-3-base.list
 
