@@ -164,8 +164,8 @@ EOF
              $SUDO tee $VOMSES/$VO.$VOMS2_SERVER > /dev/null
     done
 
-    # fetch crls
-    $SUDO $FETCH_CRL
+    # fetch crls, do not fail
+    $SUDO $FETCH_CRL || true
 }
 
 
