@@ -118,6 +118,36 @@ install_debian() {
     fi
 }
 
+install_rh7() {
+    echo "*"
+    echo "* Package installation"
+    echo "*"
+    echo ""
+    # ensure that we have curl
+    yum -q -y install curl
+
+    echo "Configuring UMD and OCCI-CLI repositories"
+    # add epel
+    yum -q -y install epel-release
+
+    # get repos for UMD (includes CAs) and rOCCI
+    rpm -q umd-release || yum -q -y install \
+        http://repository.egi.eu/sw/production/umd/4/centos7/x86_64/updates/umd-release-4.1.3-1.el7.centos.noarch.rpm
+    if [ -f /etc/yum.repos.d/rocci.repo ] ; then
+	echo "Moving existing /etc/yum.repos.d/rocci.repo to /etc/yum.repos.d/rocci.repo.bkp" 1>2
+	echo "Hope this didn't mess your system" 1>2
+	mv /etc/yum.repos.d/rocci.repo /etc/yum.repos.d/rocci.repo.bak
+        curl -s http://repository.egi.eu/community/software/rocci.cli/4.3.x/releases/repofiles/centos-7-x86_64.repo > \
+                /etc/yum.repos.d/rocci.repo
+    fi
+
+    # install packages
+    echo "Installing ca-policy-egi-core, fetch-crl, voms-clients-cpp and occi-cli"
+    PKGS="ca-policy-egi-core fetch-crl occi-cli voms-clients-cpp"
+    rpm -q $PKGS > /dev/null || yum -q -y install $PKGS
+}
+
+
 install_rh6() {
     echo "*"
     echo "* Package installation"
@@ -190,6 +220,8 @@ case "$OSTYPE" in
             REV=`cat /etc/redhat-release | sed s/.*release\ // | sed s/\ .*// | cut -f1 -d"."`
             if [ "x$REV" == "x6" ] ; then
                 install_rh6
+            elif [ "x$REV" == "x7" ] ; then
+                install_rh7
             else
                 echo "Unsupported RedHat release $REV"
                 exit 1
