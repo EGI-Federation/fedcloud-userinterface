@@ -13,11 +13,21 @@
 #       ./fedcloud-ui.sh
 #
 
+# set -exuo pipefail
+
 # Some variables
 VOMSES=/etc/vomses
 VOMSDIR=/etc/grid-security/vomsdir
 SUDO=""
 FETCH_CRL=fetch-crl
+
+
+# TODO: grab this info automatically from ops portal
+VOS="fedcloud.egi.eu training.egi.eu"
+
+VO_PORT_FEDCLOUD_EGI_EU=15002
+VO_PORT_TRAINING_EGI_EU=15014
+
 
 # VOMS config
 VOMS1_SERVER=voms1.grid.cesnet.cz
@@ -170,14 +180,13 @@ install_rh6() {
 setup_voms() {
     echo ""
     echo "*"
-    echo "* fedcloud.egi.eu and training.egi.eu VOs configuration"
+    echo "* $VOS VOs configuration"
     echo "*"
     echo ""
 
     $SUDO mkdir -p $VOMSES
-    for VO_PORT in "fedcloud.egi.eu:15002" "training.egi.eu:15014" ; do
-	VO=`echo $VO_PORT | cut -f1 -d":"`
-	PORT=`echo $VO_PORT | cut -f2 -d":"`
+    for VO in $VOS; do
+        VO_PORT=$(eval echo \$VO_PORT_$(echo $VO | tr [:lower:] [:upper:] | tr "." "_"))
         $SUDO mkdir -p $VOMSDIR/$VO
         $SUDO tee $VOMSDIR/$VO/$VOMS1_SERVER.lsc > /dev/null << EOF
 $VOMS1_DN
@@ -188,9 +197,9 @@ $VOMS2_DN
 $VOMS2_CA
 EOF
 
-	echo "\"$VO\" \"$VOMS1_SERVER\" \"$PORT\" \"$VOMS1_DN\" \"$VO\"" | \
+        echo "\"$VO\" \"$VOMS1_SERVER\" \"$VO_PORT\" \"$VOMS1_DN\" \"$VO\"" | \
              $SUDO tee $VOMSES/$VO.$VOMS1_SERVER > /dev/null
-	echo "\"$VO\" \"$VOMS2_SERVER\" \"$PORT\" \"$VOMS2_DN\" \"$VO\"" | \
+        echo "\"$VO\" \"$VOMS2_SERVER\" \"$VO_PORT\" \"$VOMS2_DN\" \"$VO\"" | \
              $SUDO tee $VOMSES/$VO.$VOMS2_SERVER > /dev/null
     done
 
